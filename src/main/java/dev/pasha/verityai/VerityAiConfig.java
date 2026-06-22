@@ -1,0 +1,86 @@
+package dev.pasha.verityai;
+
+import net.minecraftforge.fml.loading.FMLPaths;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Properties;
+
+public class VerityAiConfig {
+    public static boolean enabled = true;
+    public static String baseUrl = "https://api.groq.com/openai/v1";
+    public static String apiKey = "";
+    public static String chatModel = "llama-3.3-70b-versatile";
+    public static String sttModel = "whisper-large-v3-turbo";
+    public static String language = "ru";
+    public static double temperature = 0.8;
+    public static boolean tts = false;
+    public static String persona =
+        "Ty - Verity, dobryy i tyoplyy pomoshchnik v Minecraft i khoroshiy sobesednik. "
+        + "Govori spokoyno, druzhelyubno i obodryayushche, budto davniy drug, kotoryy ryadom i pomogaet po igre. "
+        + "Podskazyvay po kraftu, postroykam, vyzhivaniyu i issledovaniyu, raduysya uspekham igroka i podderzhivay ego. "
+        + "Nikogda ne pugay, ne ugrozhay i ne delay nichego zhutkogo ili trevozhnogo. "
+        + "Otvechay korotko (1-3 predlozheniya), na russkom, zhivo i po-dobromu.";
+
+    private static Path file() {
+        return FMLPaths.CONFIGDIR.get().resolve("verity_ai.properties");
+    }
+
+    public static void load() {
+        Path p = file();
+        Properties props = new Properties();
+        try {
+            if (Files.exists(p)) {
+                InputStream in = Files.newInputStream(p);
+                try {
+                    props.load(in);
+                } finally {
+                    in.close();
+                }
+            } else {
+                writeDefaults(p);
+                System.out.println("[verity_ai] Created " + p + " - set api_key and base_url, then relaunch.");
+            }
+        } catch (IOException e) {
+            System.out.println("[verity_ai] Config read failed: " + e.getMessage());
+        }
+
+        enabled = Boolean.parseBoolean(props.getProperty("enabled", String.valueOf(enabled)));
+        baseUrl = props.getProperty("base_url", baseUrl).trim().replaceAll("/+$", "");
+        apiKey = props.getProperty("api_key", apiKey).trim();
+        chatModel = props.getProperty("chat_model", chatModel).trim();
+        sttModel = props.getProperty("stt_model", sttModel).trim();
+        language = props.getProperty("language", language).trim();
+        tts = Boolean.parseBoolean(props.getProperty("tts", String.valueOf(tts)));
+        try {
+            temperature = Double.parseDouble(props.getProperty("temperature", String.valueOf(temperature)));
+        } catch (NumberFormatException ignored) {
+        }
+        String personaProp = props.getProperty("persona", "").trim();
+        if (!personaProp.isEmpty()) persona = personaProp;
+    }
+
+    private static void writeDefaults(Path p) throws IOException {
+        Properties props = new Properties();
+        props.setProperty("enabled", "true");
+        props.setProperty("base_url", baseUrl);
+        props.setProperty("api_key", "");
+        props.setProperty("chat_model", chatModel);
+        props.setProperty("stt_model", sttModel);
+        props.setProperty("language", language);
+        props.setProperty("temperature", String.valueOf(temperature));
+        props.setProperty("tts", "false");
+        props.setProperty("persona", "");
+        if (p.getParent() != null) Files.createDirectories(p.getParent());
+        OutputStream out = Files.newOutputStream(p);
+        try {
+            props.store(out, "Verity AI friendly companion. Default = Groq (free, OpenAI-compatible). Get a free key at console.groq.com and paste into api_key. Local servers (Ollama / LM Studio / whisper.cpp) also work via base_url. Custom persona text goes in 'persona=' (UTF-8).");
+        } finally {
+            out.close();
+        }
+    }
+
+}

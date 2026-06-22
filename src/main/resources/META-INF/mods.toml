@@ -1,0 +1,24 @@
+modLoader="javafml"
+loaderVersion="[36,)"
+license="MIT"
+
+[[mods]]
+modId="verity_ai"
+version="1.0.0"
+displayName="Verity AI Friend"
+authors="Pavel"
+description='''A kind voice companion for Minecraft: hold a key, talk, and Verity helps you and chats back as a friendly LLM. OpenAI-compatible (local Ollama / LM Studio / whisper.cpp also work). No horror, no scares.'''
+
+[[dependencies.verity_ai]]
+modId="forge"
+mandatory=true
+versionRange="[36,)"
+ordering="NONE"
+side="CLIENT"
+
+[[dependencies.verity_ai]]
+modId="minecraft"
+mandatory=true
+versionRange="[1.16.5,1.17)"
+ordering="NONE"
+side="CLIENT"
