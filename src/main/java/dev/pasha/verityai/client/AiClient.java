@@ -39,7 +39,7 @@ public class AiClient {
         String body = readResponse(c, "STT");
         String text = body.trim();
         if (text.startsWith("{")) {
-            JsonObject o = JsonParser.parseString(text).getAsJsonObject();
+            JsonObject o = new JsonParser().parse(text).getAsJsonObject();
             if (o.has("text")) text = o.get("text").getAsString().trim();
         }
         return text;
@@ -68,7 +68,7 @@ public class AiClient {
             out.close();
         }
         String body = readResponse(c, "LLM");
-        JsonObject o = JsonParser.parseString(body).getAsJsonObject();
+        JsonObject o = new JsonParser().parse(body).getAsJsonObject();
         return o.getAsJsonArray("choices").get(0).getAsJsonObject()
             .getAsJsonObject("message").get("content").getAsString().trim();
     }
